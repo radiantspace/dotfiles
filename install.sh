@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-cd "$(dirname "${BASH_SOURCE}")";
+cd "$(dirname "${BASH_SOURCE[0]}")";
 
 git pull origin main;
 
 # Get the absolute path to the aliases file
-ALIASES_PATH="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)/shell/aliases.sh"
+ALIASES_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/shell/aliases.sh"
 
 # Source command to add to .bashrc
 SOURCE_CMD="source \"$ALIASES_PATH\""
@@ -23,9 +23,11 @@ if [ -f "$BASHRC_PATH" ]; then
         # Check if the exact source command matches
         if ! grep -qF "$SOURCE_CMD" "$BASHRC_PATH"; then
             # Marker exists but path is different - update it
+            # Create a backup first
+            cp "$BASHRC_PATH" "$BASHRC_PATH.bak"
             # Find the line after the marker and replace it
-            sed -i "/^${MARKER//\//\\/}\$/,+1 s|^source .*aliases\.sh\".*|$SOURCE_CMD|" "$BASHRC_PATH"
-            echo "Updated aliases path in $BASHRC_PATH"
+            sed -i "/^${MARKER//\//\\/}\$/,+1 s|^source.*aliases\.sh\"$|$SOURCE_CMD|" "$BASHRC_PATH"
+            echo "Updated aliases path in $BASHRC_PATH (backup saved as $BASHRC_PATH.bak)"
         else
             echo "Aliases already sourced in $BASHRC_PATH"
         fi
